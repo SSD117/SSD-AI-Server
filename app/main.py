@@ -1,12 +1,26 @@
-from typing import Union
 from fastapi import FastAPI
+from pydantic import BaseModel
+from cluster import cluster
 
+class Survey(BaseModel):
+    preference: int
+    intense: int
+    frequency: int
+    friend: int
+    goal: int
+    method: int
+    activity: int
+    place: int
+    time: int
+    type: int
 app = FastAPI()
 
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
+@app.post("/")
+async def read_root(survey: Survey):
+    survey_dict = survey.model_dump()
+    user_scores = []
+    for key, val in survey_dict.items():
+        user_scores.append(val)
+    result = cluster(user_scores)
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+    return {"sports": result}
